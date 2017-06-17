@@ -36,7 +36,6 @@ public class GameWorld {
 	public TiledMap tiledMap = Assets.manager.get("assets/graphics/map.tmx", TiledMap.class);
 	public List<Packet> packets = Collections.synchronizedList(new ArrayList<Packet>());
 	public List<Entity> entities = new ArrayList<Entity>();
-	private ArrayList<Entity> garbage = new ArrayList<>();
 	public float camZoom = 2f;
 
 	public GameWorld() {
@@ -98,7 +97,7 @@ public class GameWorld {
 		
 		case 2: {
 			DestroyPacket p = (DestroyPacket) packet;
-			garbage.add(getEntity(p.uid));
+			getEntity(p.uid).isDead = true;
 			
 			break;
 		}
@@ -238,21 +237,21 @@ public class GameWorld {
 					Entity projectile = ((Entity) fA.getUserData());
 					pl.getHit((projectile.type == Variables.TYPE_KUNAI) ? Variables.KUNAI_DAMAGE : Variables.BOMB_DAMAGE, projectile.uid);
 					EffectRenderer.renderer.create(projectile.posX, projectile.posY, projectile.leftVectorDegree, (projectile.type == Variables.TYPE_KUNAI) ? Variables.EFFECT_BLOOD : Variables.EFFECT_EXPLOSION);
-					garbage.add((Entity) fA.getUserData()); 
+					projectile.isDead = true;
 				} else if (fB.getUserData() instanceof Entity && (((Entity) fB.getUserData()).type == Variables.TYPE_KUNAI || ((Entity) fB.getUserData()).type == Variables.TYPE_BOMB) && fA.getUserData() instanceof Player && ((Player) fA.getUserData()).uid != ((Entity) fB.getUserData()).uid) { 
 					Player pl = ((Player) fA.getUserData());
 					Entity projectile = ((Entity) fB.getUserData());
 					pl.getHit((projectile.type == Variables.TYPE_KUNAI) ? Variables.KUNAI_DAMAGE : Variables.BOMB_DAMAGE, projectile.uid);
 					EffectRenderer.renderer.create(projectile.posX, projectile.posY, projectile.leftVectorDegree, (projectile.type == Variables.TYPE_KUNAI) ? Variables.EFFECT_BLOOD : Variables.EFFECT_EXPLOSION);
-					garbage.add((Entity) fB.getUserData()); 
+					projectile.isDead = true;
 				} else if (fB.getUserData() instanceof Entity && (((Entity) fB.getUserData()).type == Variables.TYPE_KUNAI || ((Entity) fB.getUserData()).type == Variables.TYPE_BOMB) && fA.getUserData() instanceof String) { 
 					Entity projectile = ((Entity) fB.getUserData());
 					EffectRenderer.renderer.create(projectile.posX, projectile.posY, projectile.normalizedDegree, (projectile.type == 2) ? Variables.EFFECT_DUST : Variables.EFFECT_EXPLOSION);
-					garbage.add(projectile); 
+					projectile.isDead = true;
 				} else if (fA.getUserData() instanceof Entity && (((Entity) fA.getUserData()).type == Variables.TYPE_KUNAI || ((Entity) fA.getUserData()).type == Variables.TYPE_BOMB) && fB.getUserData() instanceof String) { 
 					Entity projectile = ((Entity) fA.getUserData());
 					EffectRenderer.renderer.create(projectile.posX, projectile.posY, projectile.normalizedDegree, (projectile.type == 2) ? Variables.EFFECT_DUST : Variables.EFFECT_EXPLOSION);
-					garbage.add(projectile);
+					projectile.isDead = true;
 				}
 				
 				if (fA.getUserData().equals("foot") || fB.getUserData().equals("foot")) {
@@ -300,22 +299,19 @@ public class GameWorld {
 		// process network packets
 		processPackets();
 				
-		// clean dead objects
-		if (!world.isLocked() && garbage.size() > 0) {
-			for (Entity entity : garbage) {
-				if (entity.body != null) {
+		// update entities
+		for (Iterator<Entity> i = entities.iterator(); i.hasNext();) {
+			Entity entity = i.next();
+			if (entity.isDead) {
+				if (entity.body != null && !world.isLocked()) {
 					world.destroyBody(entity.body);
 					entity.body.setUserData(null);
 					entity.body = null;
 				}
-				entities.remove(entity);
+				i.remove();
+			} else {
+				entity.update();
 			}
-			garbage.clear();
-		}
-
-		// update entities
-		for (Entity entity : entities) {
-			entity.update();
 		}
 
 		// simulate physics
