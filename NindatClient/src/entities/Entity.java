@@ -21,7 +21,7 @@ public class Entity {
 	public float normalizedDegree, leftVectorDegree, rightVectorDegree;
 	public byte type, dir;
 	public float speed, angle;
-	public boolean isChanged;
+	public boolean isChanged, isDead;
 	public Texture texture;
 	
 	public Body body;
