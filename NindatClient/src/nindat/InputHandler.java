@@ -69,13 +69,11 @@ public class InputHandler implements InputProcessor {
 		}
 		
 		if (keys[Input.Keys.UP]) {
-			if (gameWorld.camZoom >= 1f) {
+			if (gameWorld.camZoom >= 1f)
 				gameWorld.camZoom -= 0.025f;
-			}
 		} else if (keys[Input.Keys.DOWN]) {
-			if (gameWorld.camZoom <= 3f) {
+			if (gameWorld.camZoom <= 3f)
 				gameWorld.camZoom += 0.025f;
-			}
 		}
 	}
 
@@ -83,30 +81,25 @@ public class InputHandler implements InputProcessor {
 	public boolean keyDown(int keycode) {
 		keys[keycode] = true;
 		
-		if (keycode == Input.Keys.SPACE && gameWorld.player.mana > Variables.JUMP_MANA) {
-			gameWorld.player.mana -= Variables.JUMP_MANA;
+		if (keycode == Input.Keys.SPACE)
 			gameWorld.player.performAction(Variables.ACTION_JUMP);
-		}
 		
-		if (keycode == Input.Keys.E && gameWorld.player.mana > Variables.KUNAI_MANA) {
-			gameWorld.player.mana -= Variables.KUNAI_MANA;
+		if (keycode == Input.Keys.E) {
 			if (gameWorld.player.state != Variables.STATE_FLY)
 				gameWorld.player.performAction(Variables.ACTION_THROW, Variables.TYPE_KUNAI);
 			else
 				gameWorld.player.performAction(Variables.ACTION_JUMP_THROW, Variables.TYPE_KUNAI);
 		}
 		
-		if (keycode == Input.Keys.Q && gameWorld.player.mana > Variables.BOMB_MANA) {
-			gameWorld.player.mana -= Variables.BOMB_MANA;
+		if (keycode == Input.Keys.Q) {
 			if (gameWorld.player.state != Variables.STATE_FLY)
 				gameWorld.player.performAction(Variables.ACTION_THROW, Variables.TYPE_BOMB);
 			else
 				gameWorld.player.performAction(Variables.ACTION_JUMP_THROW, Variables.TYPE_BOMB);
 		}
 		
-		if (keycode == Input.Keys.R) {
+		if (keycode == Input.Keys.R)
 			gameWorld.player.reset();
-		}
 		
 		return false;
 	}
