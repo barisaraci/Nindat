@@ -41,7 +41,7 @@ public class Player extends LivingEntity {
 	}
 	
 	public void performAction(byte action) {
-		if (action == Variables.ACTION_JUMP) {
+		if (action == Variables.ACTION_JUMP && mana > Variables.JUMP_MANA) {
 			if (state == Variables.STATE_FLY && jumpType == Variables.JUMP_DOUBLE && !isDoubleJumped) {
 				startActionAnim(action, (byte) 0);
 				EffectRenderer.renderer.create(posX, posY, leftVectorDegree, Variables.EFFECT_JUMP);
@@ -53,16 +53,23 @@ public class Player extends LivingEntity {
 				EffectRenderer.renderer.create(posX, posY, leftVectorDegree, Variables.EFFECT_JUMP);
 				Vector2 impulse = new Vector2((float) (Variables.PLAYER_AIR_JUMP_SPEED * Math.cos(Math.toRadians(normalizedDegree))), (float) (Variables.PLAYER_AIR_JUMP_SPEED * Math.sin(Math.toRadians(normalizedDegree))));
 				body.applyLinearImpulse(impulse, body.getWorldCenter(), true);
-			} else {
-				if (state != Variables.STATE_FLY)
+			} else if (state != Variables.STATE_FLY) {
 				startActionAnim(action, (byte) 0);
 				EffectRenderer.renderer.create(posX, posY, leftVectorDegree, Variables.EFFECT_JUMP);
 			}
+			mana -= Variables.JUMP_MANA;
 		}
 	}
 	
 	public void performAction(byte action, byte projectileType) {
 		if (action == Variables.ACTION_THROW || action == Variables.ACTION_JUMP_THROW) {
+			if (projectileType == 2 && mana > Variables.KUNAI_MANA)
+				mana -= Variables.KUNAI_MANA;
+			else if (projectileType == 3 && mana > Variables.BOMB_MANA)
+				mana -= Variables.BOMB_MANA;
+			else 
+				return;
+			
 			startActionAnim(action, projectileType);
 			Entity projectile = new Entity(uid, projectileType, posX + width / 2, posY + height / 3, dir, world, gameWorld);
 			projectile.angle = normalizedDegree;
